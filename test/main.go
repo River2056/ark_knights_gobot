@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+func GetMousePosition() {
+	x, y := robotgo.GetMousePos()
+	fmt.Printf("x: %v, y: %v\n", x, y)
+	time.Sleep(2 * time.Second)
+}
+
 func CaptureScreen() {
 	w, h := robotgo.GetScreenSize()
 	bitmap := robotgo.CaptureScreen(0, 0, w, h)
@@ -40,18 +46,7 @@ func WriteToFile() {
 	//}
 }
 
-func TestReadFromImage() {
-	f, err := os.Open("pic_01.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	img, err := png.Decode(f)
-	fmt.Println(img)
-}
-
-func TestRgbToHex(r, g, b int) {
+func RgbToHex(r, g, b int) {
 	fmt.Printf("r: %v\n", r)
 	fmt.Printf("g: %v\n", g)
 	fmt.Printf("b: %v\n", b)
@@ -64,8 +59,13 @@ func TestRgbToHex(r, g, b int) {
 	fmt.Printf("hex: %v\n", hex)
 }
 
-func GetMousePositon() {
-	x, y := robotgo.GetMousePos()
-	fmt.Printf("x: %v, y: %v\n", x, y)
-	time.Sleep(3 * time.Second)
+func ReadFromImage() {
+	f, err := os.Open("pic_01.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	img, err := png.Decode(f)
+	fmt.Println(img)
 }

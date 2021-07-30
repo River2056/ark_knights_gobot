@@ -50,17 +50,22 @@ func initMap() {
 	}
 }
 
-func clickOnElement(r, g, b, x, y int) bool {
-	hex := robotgo.RgbToHex(uint8(r), uint8(g), uint8(b))
-	findX, findY := robotgo.FindColorCS(robotgo.CHex(hex), 0, 0, screenWidth, screenHeight)
-	if findX != -1 && findY != -1 {
-		fmt.Printf("pixel found: %v, %v, %v, clicking on cords: %v, %v\n", r, g, b, x, y)
-		robotgo.MoveClick(x, y, "left", false)
-		time.Sleep(1 * time.Second)
-		return true
+func clickOnElement(r, g, b, x, y int, c chan string) {
+	for {
+		bitmap := robotgo.CaptureScreen(0, 0, screenWidth, screenHeight)
+		defer robotgo.FreeBitmap(bitmap)
+
+		hex := robotgo.RgbToHex(uint8(r), uint8(g), uint8(b))
+		findX, findY := robotgo.FindColorCS(robotgo.CHex(hex), 0, 0, screenWidth, screenHeight)
+		if findX != -1 && findY != -1 {
+			c <- fmt.Sprintf("pixel found: %v, %v, %v, clicking on cords: %v, %v\n", r, g, b, x, y)
+			//fmt.Printf("pixel found: %v, %v, %v, clicking on cords: %v, %v\n", r, g, b, x, y)
+			robotgo.MoveClick(x, y, "left", false)
+		} else {
+			c <- fmt.Sprintf("element not found: %v, %v, %v\n", r, g, b)
+		}
+		time.Sleep(3 * time.Second)
 	}
-	time.Sleep(1 * time.Second)
-	return false
 }
 
 type Config struct {
@@ -69,33 +74,26 @@ type Config struct {
 	OperationEnd [][]int `json:"operationEnd"`
 }
 
-func runTrain() {
-	for i := 5; i > 0; i-- {
-		fmt.Printf("training commencing in %v seconds...\n", i)
-		time.Sleep(1 * time.Second)
-	}
+func main() {
 	initMap()
 	screenWidth, screenHeight = robotgo.GetScreenSize()
 
-	for {
-		bitmap := robotgo.CaptureScreen(0, 0, screenWidth, screenHeight)
-		defer robotgo.FreeBitmap(bitmap)
-
-		for _, elem := range pixelAndPos {
-			hasClicked := clickOnElement(elem[0][0], elem[0][1], elem[0][2], elem[1][0], elem[1][1])
-			if hasClicked {
-				break
-			}
-		}
-		fmt.Println("element not found, wait for next loop")
-		time.Sleep(2 * time.Second)
+	c := make(chan string)
+	for _, val := range pixelAndPos {
+		r, g, b, x, y := val[0][0], val[0][1], val[0][2], val[1][0], val[1][1]
+		go clickOnElement(r, g, b, x, y, c)
 	}
-}
 
-func main() {
-	//for {
-	//	test.GetMousePositon()
-	//}
+	for i := 5; i >= 1; i-- {
+		fmt.Printf("commencing training in %v seconds...\n", i)
+		time.Sleep(time.Second * 1)
+	}
 
-	runTrain()
+	for {
+		select {
+		case msg := <- c:
+			fmt.Print(msg)
+		}
+	}
+
 }
