@@ -3,9 +3,11 @@ package test
 import (
 	"fmt"
 	"github.com/go-vgo/robotgo"
+	hook "github.com/robotn/gohook"
 	"image/png"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -68,4 +70,39 @@ func ReadFromImage() {
 
 	img, err := png.Decode(f)
 	fmt.Println(img)
+}
+
+func GetRandomSeconds() {
+	t := time.Now().UnixNano()
+	rs := rand.NewSource(t)
+	r := rand.New(rs)
+
+	fmt.Println(r.Int())
+	fmt.Println(r.Intn(3))
+}
+
+func Duration() {
+	count := 1
+	t := time.Second * time.Duration(count)
+	fmt.Println(t)
+}
+
+func GetKeyPressed() {
+	running := true
+	i := 0
+
+	robotgo.EventHook(hook.KeyDown, []string { "enter" }, func(e hook.Event) {
+		fmt.Println("Ending training program...")
+		running = false
+		robotgo.EventEnd()
+	})
+
+	eventStart := robotgo.EventStart()
+	robotgo.EventProcess(eventStart)
+
+	for running {
+		fmt.Printf("count: %v\n", i)
+		i++
+		time.Sleep(time.Second * 1)
+	}
 }

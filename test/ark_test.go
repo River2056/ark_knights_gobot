@@ -1,6 +1,9 @@
 package test
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestGetMousePosition(t *testing.T) {
 	for {
@@ -24,4 +27,19 @@ func TestRgbToHex(t *testing.T) {
 
 func TestReadFromImage(t *testing.T) {
 	ReadFromImage()
+}
+
+func TestGetRandomSeconds(t *testing.T) {
+	for {
+		GetRandomSeconds()
+		time.Sleep(time.Second * 1)
+	}
+}
+
+func TestDuration(t *testing.T) {
+	Duration()
+}
+
+func TestGetKeyPressed(t *testing.T) {
+	GetKeyPressed()
 }
